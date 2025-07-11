@@ -1,0 +1,211 @@
+<?php 
+session_start();
+include 'common/connect.php';
+
+// Check if admin is logged in
+if (!isset($_SESSION['admin_id'])) {
+    header('location:index.php');
+    exit();
+}
+
+// Add new campaign with image upload
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['title']) && isset($_POST['goal']) && isset($_POST['description'])) {
+    $title = htmlspecialchars($_POST['title']);
+    $goal = (float)$_POST['goal'];
+    $description = htmlspecialchars($_POST['description']);
+    $image = '';
+
+    // Handle file upload
+    if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+        $target_dir = "uploads/";
+        if (!is_dir($target_dir)) {
+            mkdir($target_dir, 0777, true);
+        }
+
+        $image = basename($_FILES['image']['name']);
+        $target_file = $target_dir . $image;
+        $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
+
+        // Validate file type (only allow jpg, jpeg, png)
+        $allowed_types = ['jpg', 'jpeg', 'png'];
+        if (!in_array($imageFileType, $allowed_types)) {
+            die("Invalid file type. Only JPG, JPEG, and PNG are allowed.");
+        }
+
+        // Move file to uploads folder
+        if (!move_uploaded_file($_FILES['image']['tmp_name'], $target_file)) {
+            die("Error uploading file.");
+        }
+    }
+
+    // Insert into database
+    $stmt = $obj->prepare("INSERT INTO campaigns (title, goal, raised, image, description) VALUES (?, ?, 0, ?, ?)");
+    $stmt->bind_param("sdss", $title, $goal, $image, $description);
+    $stmt->execute();
+    $stmt->close();
+    header("Location: admin_campaigns.php");
+    exit();
+}
+
+// Fetch all campaigns
+$result = $obj->query("SELECT * FROM campaigns ORDER BY created_at DESC");
+
+// Delete campaign
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
+    $campaign_id = (int)$_POST['delete_id'];
+
+    // Fetch campaign image to delete it from the server
+    $stmt = $obj->prepare("SELECT image FROM campaigns WHERE campaign_id = ?");
+    $stmt->bind_param("i", $campaign_id);
+    $stmt->execute();
+    $stmt->bind_result($image);
+    $stmt->fetch();
+    $stmt->close();
+
+    if ($image && file_exists("uploads/" . $image)) {
+        unlink("uploads/" . $image);
+    }
+
+    // Delete campaign from database
+    $stmt = $obj->prepare("DELETE FROM campaigns WHERE campaign_id = ?");
+    $stmt->bind_param("i", $campaign_id);
+    $stmt->execute();
+    $stmt->close();
+    header("Location: admin_campaigns.php");
+    exit();
+}
+?>
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>Manage campaign</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- Bootstrap Core CSS -->
+<link href="css/bootstrap.css" rel='stylesheet' type='text/css' />
+<!-- Custom CSS -->
+<link href="css/style.css" rel='stylesheet' type='text/css' />
+<!-- font-awesome icons CSS -->
+<link href="css/font-awesome.css" rel="stylesheet"> 
+<!-- side nav css file -->
+<link href='css/SidebarNav.min.css' media='all' rel='stylesheet' type='text/css'/>
+<!-- js-->
+<script src="js/jquery-1.11.1.min.js"></script>
+<script src="js/modernizr.custom.js"></script>
+<!-- Metis Menu -->
+<script src="js/metisMenu.min.js"></script>
+<script src="js/custom.js"></script>
+<link href="css/custom.css" rel="stylesheet">
+</head> 
+<body class="cbp-spmenu-push">
+	<div class="main-content">
+		<?php include 'common/sidebar.php' ?>
+		<?php include 'common/header.php'?>
+
+		<div id="page-wrapper">
+			<div class="main-page">
+				<div class="tables">
+					<h2 class="title1">Manage Campaigns</h2>
+			
+                    <h4>Add New Campaign</h4>
+                    <form method="POST" action="admin_campaigns.php" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label>Campaign Title</label>
+                            <input type="text" class="form-control" name="title" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Campaign Goal (Rs)</label>
+                            <input type="number" class="form-control" name="goal" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Campaign Description</label>
+                            <textarea class="form-control" name="description" placeholder="Enter campaign details..." required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Campaign Image</label>
+                            <input type="file" class="form-control" name="image" accept="image/*" required>
+                        </div>
+                        <button type="submit" class="btn btn-success">Add Campaign</button>
+                    </form>
+                </div>
+
+                <div class="panel-body widget-shadow">
+                    <h4>Campaign List</h4>
+                    <div class="table-responsive"> <!-- Fix: Added this div to make table scrollable on small screens -->
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Image</th>
+                                    <th>Title</th>
+                                    <th>Description</th>
+                                    <th>Goal</th>
+                                    <th>Raised</th>
+                                    <th>Progress</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php while ($row = $result->fetch_object()) { ?>
+                                <tr>
+                                    <td><?php echo $row->campaign_id; ?></td>
+                                    <td>
+                                        <img src="uploads/<?php echo htmlspecialchars($row->image); ?>" width="100" height="70" alt="Campaign Image">
+                                    </td>
+                                    <td><?php echo htmlspecialchars($row->title); ?></td>
+                                    <td><?php echo htmlspecialchars($row->description); ?></td>
+                                    <td>Rs <?php echo number_format($row->goal, 2); ?></td>
+                                    <td>Rs <?php echo number_format($row->raised, 2); ?></td>
+                                    <td>
+                                        <div class="progress">
+                                            <div class="progress-bar progress-bar-success" 
+                                                 role="progressbar" 
+                                                 style="width: <?php echo ($row->raised / $row->goal) * 100; ?>%">
+                                                <?php echo round(($row->raised / $row->goal) * 100, 2); ?>%
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <form method="POST" style="display:inline-block;">
+                                            <input type="hidden" name="delete_id" value="<?php echo $row->campaign_id; ?>">
+                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?');">Delete</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                <?php } ?>
+                            </tbody>
+                        </table>
+                    </div> <!-- Closing div for table-responsive -->
+                </div>
+            </div>
+        </div>
+
+        <?php include 'common/footr.php'; ?>
+    </div>
+
+<script src='js/SidebarNav.min.js' type='text/javascript'></script>
+<script>
+  $('.sidebar-menu').SidebarNav()
+</script>
+
+<!-- Fix: Sidebar Toggle -->
+<script src="js/classie.js"></script>
+<script>
+    $(document).ready(function () {
+        var menuLeft = $('#cbp-spmenu-s1'),
+            showLeftPush = $('#showLeftPush'),
+            body = $('body');
+
+        showLeftPush.click(function () {
+            $(this).toggleClass('active');
+            body.toggleClass('cbp-spmenu-push-toright');
+            menuLeft.toggleClass('cbp-spmenu-open');
+        });
+    });
+</script>
+
+<script src="js/jquery.nicescroll.js"></script>
+<script src="js/scripts.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,361 @@
+/* Main Dashboard Styles */
+:root {
+    --primary-color: #3498db;
+    --secondary-color: #2ecc71;
+    --danger-color: #e74c3c;
+    --warning-color: #f39c12;
+    --info-color: #1abc9c;
+    --dark-color: #34495e;
+    --light-color: #ecf0f1;
+    --sidebar-width: 250px;
+    --sidebar-collapsed-width: 80px;
+    --transition-speed: 0.3s;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+    overflow-x: hidden;
+}
+
+.wrapper {
+    display: flex;
+    width: 100%;
+    align-items: stretch;
+}
+
+/* Sidebar Styles */
+#sidebar {
+    min-width: var(--sidebar-width);
+    max-width: var(--sidebar-width);
+    background: var(--dark-color);
+    color: #fff;
+    transition: all var(--transition-speed);
+    position: fixed;
+    height: 100vh;
+    z-index: 999;
+}
+
+#sidebar.active {
+    min-width: var(--sidebar-collapsed-width);
+    max-width: var(--sidebar-collapsed-width);
+    text-align: center;
+}
+
+#sidebar.active .sidebar-header h3 {
+    display: none;
+}
+
+#sidebar.active .sidebar-header img {
+    margin: 10px auto;
+}
+
+#sidebar.active ul li a {
+    padding: 15px 10px;
+    text-align: center;
+    font-size: 0.85em;
+}
+
+#sidebar.active ul li a i {
+    margin-right: 0;
+    display: block;
+    font-size: 1.5em;
+    margin-bottom: 5px;
+}
+
+#sidebar.active .sidebar-footer span {
+    display: none;
+}
+
+#sidebar ul li a {
+    padding: 15px;
+    display: block;
+    color: #fff;
+    text-decoration: none;
+    transition: all var(--transition-speed);
+}
+
+#sidebar ul li a:hover,
+#sidebar ul li.active > a {
+    color: var(--dark-color);
+    background: #fff;
+}
+
+#sidebar ul li a i {
+    margin-right: 10px;
+}
+
+.sidebar-header {
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.sidebar-header h3 {
+    margin: 0;
+    font-weight: 600;
+}
+
+.logo {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    margin: 10px 0;
+}
+
+.sidebar-footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.sidebar-footer a {
+    color: #fff;
+    text-decoration: none;
+}
+
+/* Content Styles */
+#content {
+    width: 100%;
+    min-height: 100vh;
+    transition: all var(--transition-speed);
+    margin-left: var(--sidebar-width);
+    padding: 20px;
+}
+
+#content.active {
+    margin-left: var(--sidebar-collapsed-width);
+}
+
+/* Navbar Styles */
+.navbar {
+    padding: 15px 10px;
+    background: #fff;
+    border: none;
+    border-radius: 0;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+#sidebarCollapse {
+    background: var(--primary-color);
+    border: none;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-left: 10px;
+    object-fit: cover;
+}
+
+/* Card Styles */
+.card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    transition: transform 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card-header {
+    background-color: #fff;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 15px 20px;
+    border-radius: 10px 10px 0 0 !important;
+    font-weight: 600;
+}
+
+.summary-card {
+    height: 100%;
+}
+
+.card-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 24px;
+}
+
+.card-value {
+    font-weight: 700;
+    margin-top: 5px;
+    margin-bottom: 0;
+}
+
+.bg-primary {
+    background-color: var(--primary-color) !important;
+}
+
+.bg-success {
+    background-color: var(--secondary-color) !important;
+}
+
+.bg-danger {
+    background-color: var(--danger-color) !important;
+}
+
+.bg-warning {
+    background-color: var(--warning-color) !important;
+}
+
+.bg-info {
+    background-color: var(--info-color) !important;
+}
+
+/* Table Styles */
+.table {
+    margin-bottom: 0;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+}
+
+.table td, .table th {
+    padding: 12px 15px;
+    vertical-align: middle;
+}
+
+/* Quick Donate Form */
+.quick-amount-buttons {
+    gap: 5px;
+}
+
+.quick-amount {
+    flex: 1;
+    padding: 8px 0;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    #sidebar {
+        min-width: var(--sidebar-collapsed-width);
+        max-width: var(--sidebar-collapsed-width);
+        text-align: center;
+        margin-left: calc(-1 * var(--sidebar-collapsed-width));
+    }
+    
+    #sidebar.active {
+        margin-left: 0;
+    }
+    
+    #content {
+        margin-left: 0;
+    }
+    
+    #content.active {
+        margin-left: var(--sidebar-collapsed-width);
+    }
+    
+    #sidebarCollapse span {
+        display: none;
+    }
+    
+    .row {
+        flex-direction: column;
+    }
+    
+    .col-md-3, .col-md-4, .col-md-8 {
+        width: 100%;
+    }
+}
+
+/* Animations */
+.fade-in {
+    animation: fadeIn 0.5s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Profile Styles */
+.profile-image-container {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    margin: 0 auto;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.profile-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-image-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 5px 0;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.profile-image-container:hover .profile-image-overlay {
+    opacity: 1;
+}
+
+.donor-level .badge {
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+}
+
+/* Impact Icons */
+.impact-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    margin: 0 auto 15px;
+}
+
+/* Form Styling */
+.form-control:disabled {
+    background-color: #f8f9fa;
+    opacity: 0.8;
+}
+
+.form-check-input:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.form-switch .form-check-input {
+    width: 3em;
+}
+
+/* Payment Method Styling */
+.payment-method {
+    transition: all 0.3s;
+}
+
+.payment-method:hover {
+    background-color: #f8f9fa;
+}
